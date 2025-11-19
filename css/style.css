@@ -76,7 +76,7 @@ body {
 }
 #sound-hint {
   position: fixed;
-  top: 50%;
+  top: 40%; /* moved up a bit */
   left: 50%;
   transform: translate(-50%, -50%);
   background: rgba(0,0,0,0.65);
