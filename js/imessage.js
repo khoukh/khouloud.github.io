@@ -21,7 +21,7 @@ window.addEventListener("load", () => {
   if (!sessionStorage.getItem("introShown")) {
     soundHint = document.createElement("div");
     soundHint.id = "sound-hint";
-    soundHint.textContent = "🔊 Tap anywhere to enable sound";
+    soundHint.textContent = "Tap anywhere to enable sound";
     document.body.appendChild(soundHint);
 
     // Fade in
