@@ -8,11 +8,22 @@ window.addEventListener("load", () => {
   // Track whether audio has been unlocked
   let audioUnlocked = false;
 
+  // Create sound hint dynamically
+  const soundHint = document.createElement("div");
+  soundHint.id = "sound-hint";
+  soundHint.textContent = "🔊 Tap to enable sound";
+  document.body.appendChild(soundHint);
+
   // Unlock audio on first interaction
   window.addEventListener(
     "click",
     () => {
       audioUnlocked = true;
+
+      // HIDE HINT 👇👇👇
+      soundHint.classList.add("hidden");
+
+      // Unlock audio
       sendSound.play().catch(() => {});
       sendSound.pause();
       receiveSound.play().catch(() => {});
@@ -26,7 +37,6 @@ window.addEventListener("load", () => {
   if (navEntries.length > 0 && navEntries[0].type === "reload") {
     sessionStorage.removeItem("introShown");
   }
-  
 
   function playSound(sound) {
     if (audioUnlocked) {
@@ -34,11 +44,6 @@ window.addEventListener("load", () => {
       sound.play().catch(() => {});
     }
   }
-// Create sound hint dynamically
-const soundHint = document.createElement("div");
-soundHint.id = "sound-hint";
-soundHint.textContent = "🔊 Tap to enable sound";
-document.body.appendChild(soundHint);
 
   function startIntro() {
     let index = 0;
