@@ -74,7 +74,7 @@ body {
   line-height: 1.5;
   opacity: 0;
 }
-.sound-hint {
+#sound-hint {
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -90,7 +90,7 @@ body {
   transition: opacity 0.4s ease, transform 0.4s ease;
   pointer-events: none; /* So it doesn't block clicks */
 }
-.sound-hint.hidden {
+#sound-hint.hidden {
   opacity: 0;
   transform: translateX(-50%) translateY(10px);
 }
