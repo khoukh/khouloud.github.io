@@ -4,15 +4,20 @@ window.addEventListener("load", () => {
   const desktopSection = document.getElementById("desktop-section");
   const sendSound = document.getElementById("sendSound");
   const receiveSound = document.getElementById("receiveSound");
+  const soundHint = document.getElementById("sound-hint");
 
-  // Track whether audio has been unlocked
   let audioUnlocked = false;
 
-  // Unlock audio on first interaction
+  // Unlock audio on first click + hide hint
   window.addEventListener(
     "click",
     () => {
       audioUnlocked = true;
+
+      // Fade out the hint
+      soundHint.classList.add("hidden");
+
+      // Pre-play to unlock
       sendSound.play().catch(() => {});
       sendSound.pause();
       receiveSound.play().catch(() => {});
@@ -93,5 +98,6 @@ window.addEventListener("load", () => {
   } else {
     imessageSection.classList.add("hidden");
     desktopSection.classList.remove("hidden");
+    soundHint.classList.add("hidden"); // no hint on repeat visits
   }
 });
