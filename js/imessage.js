@@ -5,63 +5,34 @@ window.addEventListener("load", () => {
   const sendSound = document.getElementById("sendSound");
   const receiveSound = document.getElementById("receiveSound");
 
+  if (sessionStorage.getItem("introShown")) {
+    imessageSection.classList.add("hidden");
+    desktopSection.classList.remove("hidden");
+    return;
+  }
+
   let audioUnlocked = false;
 
-  /* -----------------------------------------------------
-     🔊 CREATE SOUND HINT
-  ----------------------------------------------------- */
+  // CREATE SOUND HINT
   const soundHint = document.createElement("div");
   soundHint.id = "sound-hint";
   soundHint.textContent = "🔊 Tap anywhere to enable sound";
   document.body.appendChild(soundHint);
 
-  // Small fade-in so it looks intentional
-  requestAnimationFrame(() => {
-    soundHint.classList.add("visible");
-  });
+  // Fade in hint
+  requestAnimationFrame(() => soundHint.classList.add("visible"));
 
-  /* -----------------------------------------------------
-     🟡 UNLOCK AUDIO ON FIRST INTERACTION
-  ----------------------------------------------------- */
-  window.addEventListener(
-    "click",
-    () => {
-      audioUnlocked = true;
-
-      // Hide hint with fade-out
-      soundHint.classList.remove("visible");
-      soundHint.classList.add("hidden");
-
-      // Attempt unlock sequence
-      [sendSound, receiveSound].forEach((snd) => {
-        snd.play().catch(() => {});
-        snd.pause();
-      });
-    },
-    { once: true }
-  );
-
-  /* -----------------------------------------------------
-     🔄 RESET INTRO ONLY ON HARD REFRESH
-  ----------------------------------------------------- */
-  const navEntries = performance.getEntriesByType("navigation");
-  if (navEntries.length > 0 && navEntries[0].type === "reload") {
-    sessionStorage.removeItem("introShown");
-  }
-
-  /* -----------------------------------------------------
-     🎵 PLAY SOUND FUNCTION (GUARANTEED TO NOT BREAK)
-  ----------------------------------------------------- */
   function playSound(sound) {
     if (!audioUnlocked) return;
     sound.currentTime = 0;
     sound.play().catch(() => {});
   }
 
-  /* -----------------------------------------------------
-     ✨ INTRO SEQUENCE
-  ----------------------------------------------------- */
   function startIntro() {
+    soundHint.classList.remove("visible");
+    soundHint.classList.add("hidden");
+    imessageSection.classList.remove("hidden");
+
     let index = 0;
     const messages = [
       { from: "them", text: "Hey Khouloud, what do you do?" },
@@ -71,14 +42,36 @@ window.addEventListener("load", () => {
 
     function showMessage() {
       if (index >= messages.length) {
-        createWelcomeMessage();
+        const welcomeMsg = document.createElement("div");
+        welcomeMsg.classList.add("bubble", "me", "welcome");
+        welcomeMsg.textContent = "Sure, welcome to my workspace!";
+        chat.appendChild(welcomeMsg);
+
+        welcomeMsg.style.transform = "scale(0.7)";
+        welcomeMsg.style.opacity = "0";
+        welcomeMsg.style.transition = "transform 0.9s ease, opacity 0.9s ease";
+
+        setTimeout(() => {
+          welcomeMsg.style.transform = "scale(1.4)";
+          welcomeMsg.style.opacity = "1";
+          playSound(sendSound);
+        }, 50);
+
+        setTimeout(() => {
+          imessageSection.classList.add("fade-out");
+          setTimeout(() => {
+            imessageSection.classList.add("hidden");
+            desktopSection.classList.remove("hidden");
+          }, 800);
+        }, 1500);
+
+        sessionStorage.setItem("introShown", "true");
         return;
       }
 
       const msg = document.createElement("div");
       msg.className = `bubble ${messages[index].from}`;
       msg.textContent = messages[index].text;
-
       chat.appendChild(msg);
 
       if (messages[index].from === "me") playSound(sendSound);
@@ -88,12 +81,16 @@ window.addEventListener("load", () => {
       setTimeout(showMessage, 1200);
     }
 
-    function createWelcomeMessage() {
-      const welcomeMsg = document.createElement("div");
-      welcomeMsg.classList.add("bubble", "me", "welcome");
-      welcomeMsg.textContent = "Sure, welcome to my workspace!";
-      chat.appendChild(welcomeMsg);
+    showMessage();
+  }
 
-      welcomeMsg.style.transform = "scale(0.7)";
-      welcomeMsg.style.opacity = "0";
-      welcomeMsg.style.transition = "transform 0.9s ease, opacity 0.9s ease";
+  // UNLOCK AUDIO AND START INTRO ON FIRST CLICK
+  window.addEventListener(
+    "click",
+    () => {
+      audioUnlocked = true;
+      startIntro();
+    },
+    { once: true }
+  );
+});
