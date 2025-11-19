@@ -4,20 +4,15 @@ window.addEventListener("load", () => {
   const desktopSection = document.getElementById("desktop-section");
   const sendSound = document.getElementById("sendSound");
   const receiveSound = document.getElementById("receiveSound");
-  const soundHint = document.getElementById("sound-hint");
 
+  // Track whether audio has been unlocked
   let audioUnlocked = false;
 
-  // Unlock audio on first click + hide hint
+  // Unlock audio on first interaction
   window.addEventListener(
     "click",
     () => {
       audioUnlocked = true;
-
-      // Fade out the hint
-      soundHint.classList.add("hidden");
-
-      // Pre-play to unlock
       sendSound.play().catch(() => {});
       sendSound.pause();
       receiveSound.play().catch(() => {});
@@ -31,6 +26,7 @@ window.addEventListener("load", () => {
   if (navEntries.length > 0 && navEntries[0].type === "reload") {
     sessionStorage.removeItem("introShown");
   }
+  
 
   function playSound(sound) {
     if (audioUnlocked) {
@@ -38,6 +34,11 @@ window.addEventListener("load", () => {
       sound.play().catch(() => {});
     }
   }
+// Create sound hint dynamically
+const soundHint = document.createElement("div");
+soundHint.id = "sound-hint";
+soundHint.textContent = "🔊 Tap to enable sound";
+document.body.appendChild(soundHint);
 
   function startIntro() {
     let index = 0;
@@ -98,6 +99,5 @@ window.addEventListener("load", () => {
   } else {
     imessageSection.classList.add("hidden");
     desktopSection.classList.remove("hidden");
-    soundHint.classList.add("hidden"); // no hint on repeat visits
   }
 });
