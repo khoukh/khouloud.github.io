@@ -10,7 +10,7 @@ window.addEventListener("load", () => {
   // CREATE SOUND HINT
   const soundHint = document.createElement("div");
   soundHint.id = "sound-hint";
-  soundHint.textContent = "🔊 Tap anywhere to enable sound";
+  soundHint.textContent = "Tap anywhere to enable sound";
   document.body.appendChild(soundHint);
 
   // Small fade-in
