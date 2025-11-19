@@ -5,34 +5,47 @@ window.addEventListener("load", () => {
   const sendSound = document.getElementById("sendSound");
   const receiveSound = document.getElementById("receiveSound");
 
-  if (sessionStorage.getItem("introShown")) {
-    imessageSection.classList.add("hidden");
-    desktopSection.classList.remove("hidden");
-    return;
-  }
-
+  // Track whether audio has been unlocked
   let audioUnlocked = false;
 
-  // CREATE SOUND HINT
+  // Create sound hint dynamically
   const soundHint = document.createElement("div");
   soundHint.id = "sound-hint";
-  soundHint.textContent = "🔊 Tap anywhere to enable sound";
+  soundHint.textContent = "🔊 Tap to enable sound";
   document.body.appendChild(soundHint);
 
-  // Fade in hint
-  requestAnimationFrame(() => soundHint.classList.add("visible"));
+  // Unlock audio on first interaction
+  window.addEventListener(
+    "click",
+    () => {
+      audioUnlocked = true;
+
+      // HIDE HINT 👇👇👇
+      soundHint.classList.add("hidden");
+
+      // Unlock audio
+      sendSound.play().catch(() => {});
+      sendSound.pause();
+      receiveSound.play().catch(() => {});
+      receiveSound.pause();
+    },
+    { once: true }
+  );
+
+  // Reset intro only on hard refresh
+  const navEntries = performance.getEntriesByType("navigation");
+  if (navEntries.length > 0 && navEntries[0].type === "reload") {
+    sessionStorage.removeItem("introShown");
+  }
 
   function playSound(sound) {
-    if (!audioUnlocked) return;
-    sound.currentTime = 0;
-    sound.play().catch(() => {});
+    if (audioUnlocked) {
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    }
   }
 
   function startIntro() {
-    soundHint.classList.remove("visible");
-    soundHint.classList.add("hidden");
-    imessageSection.classList.remove("hidden");
-
     let index = 0;
     const messages = [
       { from: "them", text: "Hey Khouloud, what do you do?" },
@@ -47,12 +60,11 @@ window.addEventListener("load", () => {
         welcomeMsg.textContent = "Sure, welcome to my workspace!";
         chat.appendChild(welcomeMsg);
 
-        welcomeMsg.style.transform = "scale(0.7)";
-        welcomeMsg.style.opacity = "0";
-        welcomeMsg.style.transition = "transform 0.9s ease, opacity 0.9s ease";
+        welcomeMsg.style.transform = "scale(0)";
+        welcomeMsg.style.transition = "transform 0.8s ease, opacity 0.8s ease";
 
         setTimeout(() => {
-          welcomeMsg.style.transform = "scale(1.4)";
+          welcomeMsg.style.transform = "scale(1.5)";
           welcomeMsg.style.opacity = "1";
           playSound(sendSound);
         }, 50);
@@ -70,12 +82,15 @@ window.addEventListener("load", () => {
       }
 
       const msg = document.createElement("div");
-      msg.className = `bubble ${messages[index].from}`;
+      msg.classList.add("bubble", messages[index].from);
       msg.textContent = messages[index].text;
       chat.appendChild(msg);
 
-      if (messages[index].from === "me") playSound(sendSound);
-      else playSound(receiveSound);
+      if (messages[index].from === "me") {
+        playSound(sendSound);
+      } else {
+        playSound(receiveSound);
+      }
 
       index++;
       setTimeout(showMessage, 1200);
@@ -84,13 +99,10 @@ window.addEventListener("load", () => {
     showMessage();
   }
 
-  // UNLOCK AUDIO AND START INTRO ON FIRST CLICK
-  window.addEventListener(
-    "click",
-    () => {
-      audioUnlocked = true;
-      startIntro();
-    },
-    { once: true }
-  );
+  if (!sessionStorage.getItem("introShown")) {
+    startIntro();
+  } else {
+    imessageSection.classList.add("hidden");
+    desktopSection.classList.remove("hidden");
+  }
 });
