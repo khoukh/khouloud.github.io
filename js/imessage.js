@@ -7,36 +7,47 @@ window.addEventListener("load", () => {
 
   let audioUnlocked = false;
 
-  // -----------------------------------------------------
-  // 🔊 CREATE SOUND HINT
-  // -----------------------------------------------------
-  const soundHint = document.createElement("div");
-  soundHint.id = "sound-hint";
-  soundHint.textContent = "Tap anywhere to enable sound";
-  document.body.appendChild(soundHint);
-
-  // Show it after a tiny delay so it's visible
-  setTimeout(() => soundHint.classList.add("visible"), 50);
-
-  // Automatically hide the hint after 5 seconds
-  setTimeout(() => {
-    soundHint.classList.remove("visible");
-    soundHint.classList.add("hidden");
-  }, 5000);
+  // Detect full reload → reset intro
+  const navEntries = performance.getEntriesByType("navigation");
+  if (navEntries.length > 0 && navEntries[0].type === "reload") {
+    sessionStorage.removeItem("introShown");
+  }
 
   // -----------------------------------------------------
-  // 🟡 UNLOCK AUDIO ON FIRST CLICK
+  // ONLY SHOW TAP MESSAGE IF INTRO WILL RUN
+  // -----------------------------------------------------
+  let soundHint = null;
+
+  if (!sessionStorage.getItem("introShown")) {
+    soundHint = document.createElement("div");
+    soundHint.id = "sound-hint";
+    soundHint.textContent = "🔊 Tap anywhere to enable sound";
+    document.body.appendChild(soundHint);
+
+    // Fade in
+    setTimeout(() => soundHint.classList.add("visible"), 50);
+
+    // Auto-hide after 5s
+    setTimeout(() => {
+      soundHint.classList.remove("visible");
+      soundHint.classList.add("hidden");
+    }, 5000);
+  }
+
+  // -----------------------------------------------------
+  // UNLOCK AUDIO
   // -----------------------------------------------------
   window.addEventListener(
     "click",
     () => {
       audioUnlocked = true;
 
-      // Hide the hint if it’s still visible
-      soundHint.classList.remove("visible");
-      soundHint.classList.add("hidden");
+      if (soundHint) {
+        soundHint.classList.remove("visible");
+        soundHint.classList.add("hidden");
+      }
 
-      // Unlock sounds silently
+      // Unlock sounds
       [sendSound, receiveSound].forEach((snd) => {
         snd.play().catch(() => {});
         snd.pause();
@@ -44,14 +55,6 @@ window.addEventListener("load", () => {
     },
     { once: true }
   );
-
-  // -----------------------------------------------------
-  // RESET INTRO ON HARD REFRESH
-  // -----------------------------------------------------
-  const navEntries = performance.getEntriesByType("navigation");
-  if (navEntries.length > 0 && navEntries[0].type === "reload") {
-    sessionStorage.removeItem("introShown");
-  }
 
   // -----------------------------------------------------
   // PLAY SOUND HELPER
@@ -63,7 +66,7 @@ window.addEventListener("load", () => {
   }
 
   // -----------------------------------------------------
-  // START INTRO SEQUENCE
+  // INTRO SEQUENCE
   // -----------------------------------------------------
   function startIntro() {
     let index = 0;
@@ -82,6 +85,7 @@ window.addEventListener("load", () => {
 
         welcomeMsg.style.transform = "scale(0)";
         welcomeMsg.style.transition = "transform 0.8s ease, opacity 0.8s ease";
+
         setTimeout(() => {
           welcomeMsg.style.transform = "scale(1.5)";
           welcomeMsg.style.opacity = "1";
@@ -119,7 +123,7 @@ window.addEventListener("load", () => {
   }
 
   // -----------------------------------------------------
-  // RUN INTRO OR SKIP
+  // RUN INTRO OR DIRECT DESKTOP
   // -----------------------------------------------------
   if (!sessionStorage.getItem("introShown")) {
     startIntro();
