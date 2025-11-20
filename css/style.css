@@ -75,8 +75,8 @@ body {
   opacity: 0;
 }
 #sound-hint {
-  position: fixed;
-  top: 10%; /* moved up a bit */
+  position: center;
+  top: 5%; /* moved up a bit */
   left: 50%;
   transform: translate(-50%, -50%);
   background: rgba(0,0,0,0.65);
